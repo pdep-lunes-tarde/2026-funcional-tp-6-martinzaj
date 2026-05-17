@@ -2,7 +2,7 @@ module Library where
 import PdePreludat
 
 data Ingrediente =
-    Carne | Pan | Panceta | Cheddar | Pollo | Curry | QuesoDeAlmendras | Papas
+    Carne | Pan | Panceta | Cheddar | Pollo | Curry | QuesoDeAlmendras | Papas | PatiVegano | PanIntegral
     deriving (Eq, Show)
 
 precioIngrediente Carne = 20
@@ -13,6 +13,8 @@ precioIngrediente Pollo =  10
 precioIngrediente Curry = 5
 precioIngrediente QuesoDeAlmendras = 15
 precioIngrediente Papas = 10
+precioIngrediente PatiVegano = 10
+precioIngrediente PanIntegral = 3
 
 data Hamburguesa = Hamburguesa {
     precioBase :: Number,
@@ -31,7 +33,7 @@ agregarIngrediente unIngrediente unaHamburguesa = unaHamburguesa { ingredientes 
 
 
 ingredientesBase :: [Ingrediente]
-ingredientesBase = [Carne, Pollo]
+ingredientesBase = [Carne, Pollo, PatiVegano]
 
 ingredienteBase :: Hamburguesa -> Ingrediente
 ingredienteBase unaHamburguesa = elegirIngredienteBase (filter (estaEn unaHamburguesa) ingredientesBase)
@@ -73,3 +75,35 @@ bigPdep = agregarIngrediente Curry dobleCuarto
 
 delDia :: Hamburguesa -> Hamburguesa
 delDia = descuento 30 . agregarIngrediente Papas
+
+
+
+
+
+
+
+
+
+cambiarIngredientes :: (Ingrediente -> Ingrediente) -> Hamburguesa -> Hamburguesa
+cambiarIngredientes unaFuncion unaHamburguesa = unaHamburguesa { ingredientes = map unaFuncion (ingredientes unaHamburguesa) }
+
+hacerVeggie :: Hamburguesa -> Hamburguesa
+hacerVeggie = cambiarIngredientes convertirIngredienteVeggie
+
+convertirIngredienteVeggie :: Ingrediente -> Ingrediente
+convertirIngredienteVeggie Carne = PatiVegano
+convertirIngredienteVeggie Pollo = PatiVegano
+convertirIngredienteVeggie PatiVegano = PatiVegano
+convertirIngredienteVeggie Cheddar = QuesoDeAlmendras
+convertirIngredienteVeggie Panceta = BaconDeTofu
+convertirIngredienteVeggie unIngrediente = unIngrediente
+
+cambiarPanDePati :: Hamburguesa -> Hamburguesa
+cambiarPanDePati = cambiarIngredientes cambiarPanIntegral
+
+cambiarPanIntegral :: Ingrediente -> Ingrediente
+cambiarPanIntegral Pan = PanIntegral
+cambiarPanIntegral unIngrediente = unIngrediente
+
+dobleCuartoVegano :: Hamburguesa
+dobleCuartoVegano = cambiarPanDePati . hacerVeggie $ dobleCuarto
